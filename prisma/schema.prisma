@@ -1,0 +1,57 @@
+// Local SQLite. For Supabase: provider postgresql, migrate with prisma.config URL.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Author {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  bio       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  books     Book[]
+}
+
+model Book {
+  id              String   @id @default(cuid())
+  title           String
+  slug            String   @unique
+  description     String?
+  language        String   @default("en")
+  coverImageUrl    String?
+  /** CSS color for react-parallax-tilt glare (e.g. rgba(200,180,255,0.85)). Null = default on cover component. */
+  coverGlareColor  String?
+  publishedYear   Int?
+  gutenbergId     Int?     @unique
+  sourceUrl       String?
+  textStorageKey  String?
+  fullText        String?
+  authorId        String
+  author          Author   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  chapters        BookChapter[]
+
+  @@index([authorId])
+  @@index([slug])
+}
+
+model BookChapter {
+  id        String   @id @default(cuid())
+  bookId    String
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  order     Int
+  title     String?
+  content   String
+  createdAt DateTime @default(now())
+
+  @@unique([bookId, order])
+  @@index([bookId])
+}
