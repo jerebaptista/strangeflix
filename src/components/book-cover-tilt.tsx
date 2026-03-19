@@ -55,6 +55,7 @@ export function BookCoverTilt({
             className="object-cover"
             priority={priority}
             draggable={false}
+            unoptimized={process.env.NODE_ENV === "development"}
           />
         </div>
       </Tilt>
