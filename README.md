@@ -33,7 +33,9 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Deploy (Vercel)
 
 1. Create a **Neon** (or Supabase) database and copy the connection string (`sslmode=require` where required).
-2. In Vercel → Project → **Settings → Environment Variables**, set `DATABASE_URL` for Production (and Preview if you want previews to hit a DB).
+2. In Vercel → Project → **Settings → Environment Variables**, set `DATABASE_URL` for **Production** (required). Add it for **Preview** too if you want preview deployments to use a DB (e.g. Neon branch).
+   - Without this, the build stops with an explicit error — there is no default database on Vercel.
+   - If you ever see `P1001` / `127.0.0.1:5432`, the old fallback was used; redeploy after setting `DATABASE_URL`.
 3. **Build** runs `prisma generate`, `prisma migrate deploy`, then `next build` — migrations apply automatically.
 4. **Seed once** (data is not created by migrate):
 
