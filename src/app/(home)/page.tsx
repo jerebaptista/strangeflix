@@ -69,7 +69,8 @@ export default async function HomePage() {
       },
     });
     books = mapRowsToHomeBooks(rows);
-  } catch {
+  } catch (firstErr) {
+    console.error("[home] prisma findMany (full select) failed:", firstErr);
     /* BD sem migração publishedMonth/publishedDay — query compatível */
     try {
       const rows = await prisma.book.findMany({
@@ -92,7 +93,8 @@ export default async function HomePage() {
           publishedDay: null,
         })),
       );
-    } catch {
+    } catch (secondErr) {
+      console.error("[home] prisma findMany (fallback select) failed:", secondErr);
       books = [];
     }
   }
