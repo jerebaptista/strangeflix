@@ -29,6 +29,10 @@ model Book {
   /** CSS color for react-parallax-tilt glare (e.g. rgba(200,180,255,0.85)). Null = default on cover component. */
   coverGlareColor  String?
   publishedYear   Int?
+  /** 1–12; optional, for display (e.g. “February 1928”). */
+  publishedMonth  Int?
+  /** 1–31; optional, with month + year (e.g. “20 February 1928”). */
+  publishedDay    Int?
   gutenbergId     Int?     @unique
   sourceUrl       String?
   textStorageKey  String?

@@ -15,7 +15,7 @@ export function SiteConditionalLayout({ children }: { children: ReactNode }) {
       <div
         className={cn(
           "flex min-h-0 flex-1 flex-col",
-          !isBookReader && "pt-12",
+          !isBookReader && "pt-[5.25rem]",
         )}
       >
         {children}
