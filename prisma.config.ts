@@ -1,12 +1,13 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
+import { resolvePostgresUrl } from "./src/lib/database-url";
 
 /**
- * Placeholder quando `DATABASE_URL` falta: permite `prisma generate` e o carregamento do config.
- * Na Vercel, `migrate deploy` só corre depois (via scripts/prisma-migrate-deploy.cjs), com validação explícita.
+ * Placeholder quando nenhuma URL Postgres está definida: permite `prisma generate`.
+ * O script `prisma-migrate-deploy.cjs` injeta `DATABASE_URL` no processo do migrate.
  */
 const databaseUrl =
-  process.env.DATABASE_URL?.trim() ??
+  resolvePostgresUrl() ??
   "postgresql://127.0.0.1:5432/strangeflix_placeholder?schema=public";
 
 export default defineConfig({
