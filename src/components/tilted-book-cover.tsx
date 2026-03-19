@@ -11,7 +11,7 @@ export const COVER_RADIUS_PX = 4;
  * `false` — capa estática (sem tilt/glare), útil para testar se a animação afeta o layout.
  * `true` — comportamento normal com react-parallax-tilt.
  */
-const BOOK_COVER_TILT_ENABLED = false;
+const BOOK_COVER_TILT_ENABLED = true;
 
 type Props = {
   title: string;

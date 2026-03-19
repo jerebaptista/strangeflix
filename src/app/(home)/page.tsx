@@ -52,6 +52,7 @@ function mapRowsToHomeBooks(
 
 export default async function HomePage() {
   let books: HomeBook[] = [];
+  let catalogLoadFailed = false;
   try {
     const rows = await prisma.book.findMany({
       where: { coverImageUrl: { not: null } },
@@ -95,13 +96,14 @@ export default async function HomePage() {
       );
     } catch (secondErr) {
       console.error("[home] prisma findMany (fallback select) failed:", secondErr);
+      catalogLoadFailed = true;
       books = [];
     }
   }
 
   return (
     <main className="flex min-h-0 flex-1 flex-col">
-      <HomeBooksClient books={books} />
+      <HomeBooksClient books={books} catalogLoadFailed={catalogLoadFailed} />
     </main>
   );
 }
