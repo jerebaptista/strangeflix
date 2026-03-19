@@ -36,7 +36,7 @@ Open [http://localhost:3000](http://localhost:3000).
 2. In Vercel → Project → **Settings → Environment Variables**, set `DATABASE_URL` for **Production** (required). Add it for **Preview** too if you want preview deployments to use a DB (e.g. Neon branch).
    - Without this, the build stops with an explicit error — there is no default database on Vercel.
    - If you ever see `P1001` / `127.0.0.1:5432`, the old fallback was used; redeploy after setting `DATABASE_URL`.
-3. **Build** runs `prisma generate`, `prisma migrate deploy`, then `next build` — migrations apply automatically.
+3. **Build** runs `prisma generate`, then a small script that runs `prisma migrate deploy` only if `DATABASE_URL` is set (on Vercel without it, you get a clear error instead of failing inside `prisma generate`), then `next build`.
 4. **Seed once** (data is not created by migrate):
 
    ```bash
