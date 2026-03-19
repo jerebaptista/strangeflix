@@ -33,10 +33,10 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Deploy (Vercel)
 
 1. Create a **Neon** (or Supabase) database and copy the connection string (`sslmode=require` where required).
-2. In Vercel → Project → **Settings → Environment Variables**, ensure **one** Postgres URL exists for **Production** (required). The app checks, in order: `DATABASE_URL`, `POSTGRES_PRISMA_URL`, `POSTGRES_URL`, `POSTGRES_URL_NON_POOLING` (Neon / Vercel Postgres integrations often use `POSTGRES_*` only).
-   - Add for **Preview** too if preview deployments should hit a database.
-   - Without any of these, the build stops with an explicit error.
-3. **Build** runs `prisma generate`, then a small script that runs `prisma migrate deploy` only if `DATABASE_URL` is set (on Vercel without it, you get a clear error instead of failing inside `prisma generate`), then `next build`.
+2. In Vercel → Project → **Settings → Environment Variables**, add **one** Postgres URL for **Production** (and **Preview** if you use previews). Checked in order: `DATABASE_URL`, `POSTGRES_PRISMA_URL`, `POSTGRES_URL`, `POSTGRES_URL_NON_POOLING`.
+   - **First deploy without a URL:** the build still completes; migrations are **skipped** (see build logs). Add the variable and **Redeploy** so `prisma migrate deploy` runs.
+   - Until a URL exists at **runtime**, pages that use Prisma will error or show an empty catalog.
+3. **Build:** `prisma generate` → migrate script (runs `prisma migrate deploy` only when a URL is present) → `next build`.
 4. **Seed once** (data is not created by migrate):
 
    ```bash
