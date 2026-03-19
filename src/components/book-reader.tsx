@@ -276,7 +276,7 @@ export function BookReader({ title, authorName, fullText }: Props) {
                       <SelectItem
                         key={opt.id}
                         value={opt.id}
-                        className="focus:bg-zinc-800 focus:text-white"
+                        className="focus:bg-zinc-900 focus:text-white"
                       >
                         <span className="font-sans">{opt.label}</span>
                       </SelectItem>

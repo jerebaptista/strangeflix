@@ -5,7 +5,7 @@ export default function HomeLayout({ children }: { children: ReactNode }) {
   return (
     <div className="dark flex min-h-dvh flex-1 flex-col bg-background text-foreground">
       <SiteHeader />
-      <div className="flex min-h-0 flex-1 flex-col">{children}</div>
+      <div className="flex min-h-0 flex-1 flex-col pt-12">{children}</div>
     </div>
   );
 }
