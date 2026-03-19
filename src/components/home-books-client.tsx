@@ -33,12 +33,16 @@ export function HomeBooksClient({
                 Couldn&apos;t load the catalog
               </p>
               <p className="max-w-md text-sm leading-relaxed text-zinc-400">
-                The database didn&apos;t respond. On serverless hosts (e.g. Vercel), SQLite
-                often isn&apos;t persistent — use a hosted database (Postgres), run{" "}
+                Check <code className="rounded bg-zinc-800 px-1.5 py-0.5 text-zinc-300">DATABASE_URL</code>{" "}
+                on the host (e.g. Vercel env vars), run{" "}
                 <code className="rounded bg-zinc-800 px-1.5 py-0.5 text-zinc-300">
                   prisma migrate deploy
                 </code>{" "}
-                and seed in production.
+                on deploy, then{" "}
+                <code className="rounded bg-zinc-800 px-1.5 py-0.5 text-zinc-300">
+                  prisma db seed
+                </code>{" "}
+                once. See README for Neon / Supabase setup.
               </p>
             </>
           ) : (

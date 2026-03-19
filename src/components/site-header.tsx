@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 const navLinkClass =
-  "inline-flex h-9 w-max items-center justify-center rounded-lg text-sm font-medium text-white/75 transition-colors hover:bg-white/10 hover:text-white focus:bg-white/10 focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:outline-none data-active:bg-white/15 data-active:text-white";
+  "inline-flex h-9 w-max min-h-9 items-center justify-center rounded-lg px-4 text-sm font-medium text-white/75 transition-colors hover:bg-white/10 hover:text-white focus:bg-white/10 focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:outline-none data-active:bg-white/15 data-active:text-white sm:px-5";
 
 const items = [
   { href: "/", label: "Home" },

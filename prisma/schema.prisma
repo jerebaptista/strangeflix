@@ -1,4 +1,4 @@
-// Local SQLite. For Supabase: provider postgresql, migrate with prisma.config URL.
+// PostgreSQL (local, Neon, Supabase, etc.). URL em prisma.config.ts / DATABASE_URL.
 
 generator client {
   provider = "prisma-client"
@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 model Author {
