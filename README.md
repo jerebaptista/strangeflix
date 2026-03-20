@@ -46,6 +46,12 @@ Open [http://localhost:3000](http://localhost:3000).
 
    Or run seed from any machine with `DATABASE_URL` pointing at production.
 
+## FAQ: local Postgres vs Vercel
+
+- **Local** `DATABASE_URL` (e.g. `localhost`) only works on your machine when you run `npm run dev` (or a local `next start`). Strangeflix reads that from `.env`.
+- **Vercel** runs your app on servers in the cloud. Those servers **cannot** open a connection to `localhost` on your laptop. So the live site needs a **hosted** PostgreSQL (Neon, Supabase, Vercel Postgres, etc.) and the same connection string copied into **Vercel → Environment Variables** (`DATABASE_URL` or often `POSTGRES_URL` / `POSTGRES_PRISMA_URL` from the provider).
+- After the first deploy **with** that variable, migrations should run on build; then run **`prisma db seed`** once against the **hosted** database (not only your local DB), e.g. `vercel env pull` then `npx prisma db seed`.
+
 ## Database
 
 Models: `Author`, `Book`, `BookChapter` (see `prisma/schema.prisma`).  

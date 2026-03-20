@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
-import { prisma } from "@/lib/prisma";
 import type { HomeBook } from "@/components/home-books-client";
 import { HomeBooksClient } from "@/components/home-books-client";
+import {
+  classifyCatalogLoadError,
+  type CatalogLoadIssue,
+} from "@/lib/catalog-error";
+import { prisma } from "@/lib/prisma";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
@@ -53,6 +57,7 @@ function mapRowsToHomeBooks(
 export default async function HomePage() {
   let books: HomeBook[] = [];
   let catalogLoadFailed = false;
+  let catalogIssue: CatalogLoadIssue = "unknown";
   try {
     const rows = await prisma.book.findMany({
       where: { coverImageUrl: { not: null } },
@@ -97,13 +102,18 @@ export default async function HomePage() {
     } catch (secondErr) {
       console.error("[home] prisma findMany (fallback select) failed:", secondErr);
       catalogLoadFailed = true;
+      catalogIssue = classifyCatalogLoadError(secondErr);
       books = [];
     }
   }
 
   return (
     <main className="flex min-h-0 flex-1 flex-col">
-      <HomeBooksClient books={books} catalogLoadFailed={catalogLoadFailed} />
+      <HomeBooksClient
+        books={books}
+        catalogLoadFailed={catalogLoadFailed}
+        catalogIssue={catalogLoadFailed ? catalogIssue : undefined}
+      />
     </main>
   );
 }
