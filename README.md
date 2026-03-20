@@ -7,7 +7,8 @@ Web app for browsing and reading **public-domain horror books** (starting with L
 - **Next.js 16** (App Router) + TypeScript + Tailwind CSS v4
 - **shadcn/ui** (Base UI + Radix-style primitives)
 - **Prisma 7** + **PostgreSQL** + `@prisma/adapter-pg` + `pg`  
-  (SQLite was removed — serverless hosts like Vercel need a hosted Postgres: Neon, Supabase, etc.)
+  (SQLite was removed — for a **database-driven** catalog on Vercel you need hosted Postgres: Neon, Supabase, etc.)
+- **No `DATABASE_URL` / `POSTGRES_*`:** the app uses a **static catalog** (`src/data/static-catalog.ts`) plus `content/books/*.txt` — Vercel deploy works from the repo alone (no DB).
 
 ## Setup
 
@@ -32,12 +33,19 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Deploy (Vercel)
 
+### Files only (no database) — recommended if you skip Postgres
+
+1. Connect the Git repo to Vercel and deploy. **Do not** add `DATABASE_URL` / `POSTGRES_*` — the catalog comes from `src/data/static-catalog.ts` and `content/books/*.txt`.
+2. **Canonical URL (Open Graph, sitemap):** you usually need **no** Environment Variables. `getSiteUrl()` uses **`VERCEL_URL`**, which Vercel sets automatically → `https://<your-project>.vercel.app`.
+3. **Optional:** if you use a **custom domain**, add **`NEXT_PUBLIC_SITE_URL`** = `https://your-domain.com` (Production + Preview if you want) so metadata and sitemap use that base instead of `*.vercel.app`.
+
+**Build:** `prisma generate` → migrate script skips `migrate deploy` when no Postgres URL → `next build`.
+
+### With PostgreSQL (hosted DB)
+
 1. Create a **Neon** (or Supabase) database and copy the connection string (`sslmode=require` where required).
-2. In Vercel → Project → **Settings → Environment Variables**, add **one** Postgres URL for **Production** (and **Preview** if you use previews). Checked in order: `DATABASE_URL`, `POSTGRES_PRISMA_URL`, `POSTGRES_URL`, `POSTGRES_URL_NON_POOLING`.
-   - **First deploy without a URL:** the build still completes; migrations are **skipped** (see build logs). Add the variable and **Redeploy** so `prisma migrate deploy` runs.
-   - Until a URL exists at **runtime**, pages that use Prisma will error or show an empty catalog.
-3. **Build:** `prisma generate` → migrate script (runs `prisma migrate deploy` only when a URL is present) → `next build`.
-4. **Seed once** (data is not created by migrate):
+2. In Vercel → **Settings → Environment Variables**, add **one** Postgres URL for **Production** (and **Preview** if needed): `DATABASE_URL`, `POSTGRES_PRISMA_URL`, `POSTGRES_URL`, or `POSTGRES_URL_NON_POOLING` (first defined wins).
+3. **Redeploy** so `prisma migrate deploy` runs on build, then **seed once**:
 
    ```bash
    vercel env pull .env.production.local
@@ -45,11 +53,13 @@ Open [http://localhost:3000](http://localhost:3000).
    ```
 
    Or run seed from any machine with `DATABASE_URL` pointing at production.
+4. Same **canonical URL** rules as above (`VERCEL_URL` by default; `NEXT_PUBLIC_SITE_URL` for a custom domain).
 
 ## FAQ: local Postgres vs Vercel
 
 - **Local** `DATABASE_URL` (e.g. `localhost`) only works on your machine when you run `npm run dev` (or a local `next start`). Strangeflix reads that from `.env`.
 - **Vercel** runs your app on servers in the cloud. Those servers **cannot** open a connection to `localhost` on your laptop. So the live site needs a **hosted** PostgreSQL (Neon, Supabase, Vercel Postgres, etc.) and the same connection string copied into **Vercel → Environment Variables** (`DATABASE_URL` or often `POSTGRES_URL` / `POSTGRES_PRISMA_URL` from the provider).
+- **Files-only (no Postgres on Vercel):** you don’t need `DATABASE_URL`; keep `static-catalog` and `content/books` in sync with `prisma/seed.ts` when adding titles.
 - After the first deploy **with** that variable, migrations should run on build; then run **`prisma db seed`** once against the **hosted** database (not only your local DB), e.g. `vercel env pull` then `npx prisma db seed`.
 
 ## Database

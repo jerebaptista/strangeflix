@@ -17,6 +17,11 @@ export function resolvePostgresUrl(): string | undefined {
   return undefined;
 }
 
+/** `true` se houver URL de Postgres configurada (local ou Vercel). */
+export function hasPostgresEnv(): boolean {
+  return Boolean(resolvePostgresUrl());
+}
+
 export function postgresUrlEnvHint(): string {
   return URL_ENV_KEYS.join(", ");
 }

@@ -1,11 +1,6 @@
 import type { Metadata } from "next";
-import type { HomeBook } from "@/components/home-books-client";
 import { HomeBooksClient } from "@/components/home-books-client";
-import {
-  classifyCatalogLoadError,
-  type CatalogLoadIssue,
-} from "@/lib/catalog-error";
-import { prisma } from "@/lib/prisma";
+import { loadHomeCatalog } from "@/lib/books-data";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const metadata: Metadata = {
@@ -23,89 +18,11 @@ export const metadata: Metadata = {
   },
 };
 
-/** Evita pré-render estático no build (ex.: Vercel sem banco); a página é gerada sob demanda. */
+/** Evita pré-render estático no build quando a lista vem da BD; com catálogo em ficheiro continua a funcionar. */
 export const dynamic = "force-dynamic";
 
-function mapRowsToHomeBooks(
-  rows: {
-    slug: string;
-    title: string;
-    coverImageUrl: string | null;
-    coverGlareColor: string | null;
-    description: string | null;
-    publishedYear: number | null;
-    publishedMonth: number | null;
-    publishedDay: number | null;
-    author: { name: string };
-  }[],
-): HomeBook[] {
-  return rows
-    .filter((b): b is typeof b & { coverImageUrl: string } => b.coverImageUrl != null)
-    .map((b) => ({
-      slug: b.slug,
-      title: b.title,
-      coverImageUrl: b.coverImageUrl,
-      coverGlareColor: b.coverGlareColor,
-      authorName: b.author.name,
-      publishedYear: b.publishedYear,
-      publishedMonth: b.publishedMonth,
-      publishedDay: b.publishedDay,
-      description: b.description,
-    }));
-}
-
 export default async function HomePage() {
-  let books: HomeBook[] = [];
-  let catalogLoadFailed = false;
-  let catalogIssue: CatalogLoadIssue = "unknown";
-  try {
-    const rows = await prisma.book.findMany({
-      where: { coverImageUrl: { not: null } },
-      orderBy: { createdAt: "asc" },
-      select: {
-        slug: true,
-        title: true,
-        coverImageUrl: true,
-        coverGlareColor: true,
-        description: true,
-        publishedYear: true,
-        publishedMonth: true,
-        publishedDay: true,
-        author: { select: { name: true } },
-      },
-    });
-    books = mapRowsToHomeBooks(rows);
-  } catch (firstErr) {
-    console.error("[home] prisma findMany (full select) failed:", firstErr);
-    /* BD sem migração publishedMonth/publishedDay — query compatível */
-    try {
-      const rows = await prisma.book.findMany({
-        where: { coverImageUrl: { not: null } },
-        orderBy: { createdAt: "asc" },
-        select: {
-          slug: true,
-          title: true,
-          coverImageUrl: true,
-          coverGlareColor: true,
-          description: true,
-          publishedYear: true,
-          author: { select: { name: true } },
-        },
-      });
-      books = mapRowsToHomeBooks(
-        rows.map((b) => ({
-          ...b,
-          publishedMonth: null,
-          publishedDay: null,
-        })),
-      );
-    } catch (secondErr) {
-      console.error("[home] prisma findMany (fallback select) failed:", secondErr);
-      catalogLoadFailed = true;
-      catalogIssue = classifyCatalogLoadError(secondErr);
-      books = [];
-    }
-  }
+  const { books, catalogLoadFailed, catalogIssue } = await loadHomeCatalog();
 
   return (
     <main className="flex min-h-0 flex-1 flex-col">

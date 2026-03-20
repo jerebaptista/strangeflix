@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BookReader } from "@/components/book-reader";
-import { getSiteUrl } from "@/lib/site-url";
-import { prisma } from "@/lib/prisma";
+import { loadSiteBookBySlug } from "@/lib/books-data";
 import { formatPublicationDate } from "@/lib/format-publication";
+import { getSiteUrl } from "@/lib/site-url";
 
 type Props = { params: Promise<{ slug: string }> };
+
+export const dynamic = "force-dynamic";
 
 function extractPublishedIn(description: string | null, sourceUrl: string | null): string | null {
   if (description) {
@@ -26,10 +28,7 @@ function extractPublishedIn(description: string | null, sourceUrl: string | null
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const book = await prisma.book.findUnique({
-    where: { slug },
-    include: { author: true },
-  });
+  const book = await loadSiteBookBySlug(slug);
 
   if (!book || !book.fullText) {
     return { title: "Not found" };
@@ -71,10 +70,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function BookPage({ params }: Props) {
   const { slug } = await params;
 
-  const book = await prisma.book.findUnique({
-    where: { slug },
-    include: { author: true },
-  });
+  const book = await loadSiteBookBySlug(slug);
 
   if (!book || !book.fullText) notFound();
 
